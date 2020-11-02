@@ -98,6 +98,8 @@ class _ResultScreenState extends State<ResultScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var times = _remainingTime.toString().split(":");
+
     return Scaffold(
       appBar: AppBar(
         title: Text('죽음 카운트'),
@@ -142,33 +144,62 @@ class _ResultScreenState extends State<ResultScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Container(
-                width: 150,
-                height: 150,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Text("$_remainingDays"),
-                    Text("${_remainingTime.toString().substring(0, 12)}"),
-                  ],
-                ),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(100),
-                  border: Border.all(color: Colors.grey, width: 2),
-                  gradient: LinearGradient(
-                    begin: Alignment.topRight,
-                    end: Alignment.bottomLeft,
-                    colors: [
-                      Colors.black.withOpacity(0.9),
-                      Colors.black87.withOpacity(0.5),
-                      Colors.black54.withOpacity(0.7),
-                      Colors.black38.withOpacity(0.9),
-                    ],
-                    stops: [0.1, 0.4, 0.6, 0.9],
+              Stack(
+                overflow: Overflow.visible,
+                children: [
+                  Container(
+                    width: 200,
+                    height: 200,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          "${times[0]}시 ${times[1]}분 ${times[2].substring(0, 6)}초",
+                          style: TextStyle(
+                            fontSize: 18.0,
+                          ),
+                        ),
+                      ],
+                    ),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey, width: 2),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.4),
+                          spreadRadius: 2,
+                          blurRadius: 7,
+                          offset: Offset(0, 0),
+                        ),
+                      ],
+                      gradient: LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        colors: [
+                          Colors.black.withOpacity(0.9),
+                          Colors.black87.withOpacity(0.5),
+                          Colors.black54.withOpacity(0.7),
+                          Colors.black38.withOpacity(0.9),
+                        ],
+                        stops: [0.1, 0.4, 0.6, 0.9],
+                      ),
+                      // backgroundBlendMode:
+                    ),
                   ),
-                  // backgroundBlendMode:
-                ),
+                  Positioned.fill(
+                    top: -50,
+                    child: Align(
+                      alignment: Alignment.center,
+                      child: Text(
+                        "$_remainingDays 일",
+                        style: TextStyle(
+                          fontSize: 10.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ],
           )
