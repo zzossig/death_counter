@@ -10,39 +10,90 @@ class ResultScreen extends StatefulWidget {
 
 class _ResultScreenState extends State<ResultScreen> {
   final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
-  int _lifeSpan;
+  int _remainingDays;
+  DateTime _today = new DateTime.now();
+  DateTime _todayEnd;
+  Duration _remainingTime;
+  Timer _timer;
 
   @override
   void initState() {
     super.initState();
 
-    getLifeSpan();
+    setToday();
+    setRemainingDays();
+    startTimer();
   }
 
-  void getLifeSpan() async {
-    final prefs = await SharedPreferences.getInstance();
-    final lifeSpan = prefs.getInt('lifeSpan') ?? 0;
+  @override
+  void dispose() {
+    _timer.cancel();
+    super.dispose();
+  }
 
-    testStopwatch();
+  void setRemainingDays() async {
+    final lifeSpan = await getIntData("lifeSpan");
+    final curAge = await getIntData("curAge");
+    final registeredYear = await getIntData("registeredYear");
+
+    var now = new DateTime.now();
+    var endDate = DateTime(
+        registeredYear + (lifeSpan - curAge), DateTime.july, 1, 00, 00, 1, 1);
+    var diff = endDate.difference(now);
+    var remainingDays = diff.inDays - 1; // -1 for countdown time
 
     setState(() {
-      if (lifeSpan > 0) {
-        _lifeSpan = lifeSpan;
-      } else {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => IntroScreen(),
-          ),
-        );
-      }
+      _remainingDays = remainingDays;
     });
   }
 
-  void testStopwatch() {
-    final Stopwatch stopwatch = new Stopwatch();
-    stopwatch.start();
-    print('${stopwatch.elapsedMilliseconds}');
+  void setRemainingTimes() {
+    var now = new DateTime.now();
+    var diff = _todayEnd.difference(now);
+
+    if (diff.isNegative) {
+      setState(() {
+        _remainingDays -= 1;
+        setToday();
+      });
+    } else {
+      setState(() {
+        _remainingTime = diff;
+      });
+    }
+  }
+
+  void setToday() {
+    var now = new DateTime.now();
+    setState(() {
+      _today = new DateTime.now();
+      _todayEnd =
+          new DateTime(_today.year, _today.month, _today.day, 23, 59, 59, 999);
+      _remainingTime = _todayEnd.difference(now);
+    });
+  }
+
+  void startTimer() {
+    const fiftyMilliseconds = const Duration(milliseconds: 70);
+    _timer = new Timer.periodic(fiftyMilliseconds, (timer) {
+      setRemainingTimes();
+    });
+  }
+
+  Future<int> getIntData(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getInt(key) ?? 0;
+
+    if (data <= 0 || data == null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => IntroScreen(),
+        ),
+      );
+    }
+
+    return data;
   }
 
   @override
@@ -86,9 +137,41 @@ class _ResultScreenState extends State<ResultScreen> {
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text('$_lifeSpan'),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                width: 150,
+                height: 150,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text("$_remainingDays"),
+                    Text("${_remainingTime.toString().substring(0, 12)}"),
+                  ],
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(100),
+                  border: Border.all(color: Colors.grey, width: 2),
+                  gradient: LinearGradient(
+                    begin: Alignment.topRight,
+                    end: Alignment.bottomLeft,
+                    colors: [
+                      Colors.black.withOpacity(0.9),
+                      Colors.black87.withOpacity(0.5),
+                      Colors.black54.withOpacity(0.7),
+                      Colors.black38.withOpacity(0.9),
+                    ],
+                    stops: [0.1, 0.4, 0.6, 0.9],
+                  ),
+                  // backgroundBlendMode:
+                ),
+              ),
+            ],
+          )
         ],
       ),
     );

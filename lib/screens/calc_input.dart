@@ -25,7 +25,7 @@ class _CalcInputState extends State<CalcInput> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Text(
-                      qb.getQuestionText,
+                      qb.getQuestionText(),
                       style: TextStyle(
                         color: Colors.blue,
                         fontSize: 28.0,
@@ -38,10 +38,12 @@ class _CalcInputState extends State<CalcInput> {
                       // mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        for (int i = 0; i < qb.getQuestionAnswers.length; i++)
+                        for (var i = 0;
+                            i < qb.getQuestion().getAnswers.length;
+                            i++)
                           ListTile(
                             title: Text(
-                              qb.getQuestionAnswers[i].text,
+                              qb.getQuestion().getAnswers[i].text,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.0,
@@ -49,11 +51,11 @@ class _CalcInputState extends State<CalcInput> {
                             ),
                             leading: Radio(
                               value: i,
-                              groupValue: qb.getQuestion.selected,
+                              groupValue: qb.getQuestion().selected,
                               onChanged: (value) {
                                 setState(() {
                                   // print(value);
-                                  qb.getQuestion.selected = value;
+                                  qb.getQuestion().selected = value;
                                 });
                               },
                             ),
@@ -72,7 +74,7 @@ class _CalcInputState extends State<CalcInput> {
               ),
               child: Row(
                 children: <Widget>[
-                  for (int i = 0; i < qb.getQuestions.length; i++)
+                  for (int i = 0; i < qb.getQuestions().length; i++)
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8.0,
@@ -80,7 +82,7 @@ class _CalcInputState extends State<CalcInput> {
                       child: Text(
                         '${i + 1}',
                         style: TextStyle(
-                          color: qb.getQuestionNumber == i
+                          color: qb.getQuestionNumber() == i
                               ? Colors.red
                               : Colors.grey[800],
                         ),

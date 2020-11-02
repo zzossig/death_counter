@@ -1,6 +1,6 @@
 class Answer {
-  Answer({this.text, this.isCollect});
+  Answer({this.text, this.isCorrect});
 
   final String text;
-  final bool isCollect;
+  final bool isCorrect;
 }
