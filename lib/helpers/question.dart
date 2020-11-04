@@ -7,26 +7,13 @@ class Question {
   List<Answer> answers = [];
   int _selected = -1;
 
-  int get getCorrectAnswerNumber {
-    for (int i = 0; i < answers.length; i++) {
-      if (answers[i].isCorrect) {
-        return i + 1;
-      }
-    }
-    return -1;
-  }
-
-  Answer get getCorrectAnswer {
-    for (int i = 0; i < answers.length; i++) {
-      if (answers[i].isCorrect) {
-        return answers[i];
-      }
-    }
-    return null;
-  }
-
   List<Answer> get getAnswers {
     return answers;
+  }
+
+  void addAnswer(Answer answer) {
+    print(this.answers);
+    this.answers.add(answer);
   }
 
   String get getText {

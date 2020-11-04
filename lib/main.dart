@@ -1,8 +1,11 @@
 import 'package:death_counter/screens/result.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(
+    EasyLocalization(supportedLocales: [Locale('en'), Locale('ko')], path: 'assets/translations', fallbackLocale: Locale('en'), child: MyApp()),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,11 +16,15 @@ class MyApp extends StatelessWidget {
       title: 'Death Counter',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.red,
+        brightness: Brightness.dark,
+        unselectedWidgetColor: Colors.white,
+        primaryColor: Colors.red,
+        accentColor: Colors.blue[800],
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      darkTheme: ThemeData.dark(),
-      themeMode: ThemeMode.dark,
+      localizationsDelegates: context.localizationDelegates,
+      supportedLocales: context.supportedLocales,
+      locale: context.locale,
       home: ResultScreen(),
     );
   }

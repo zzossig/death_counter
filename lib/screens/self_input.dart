@@ -1,7 +1,9 @@
 import 'package:death_counter/screens/result.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:death_counter/widgets/input_number.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class SelfInput extends StatefulWidget {
   @override
@@ -11,15 +13,30 @@ class SelfInput extends StatefulWidget {
 class _SelfInputState extends State<SelfInput> {
   final _formKey = GlobalKey<FormState>();
   int _lifeSpan;
-  int _curAge;
+  String _birthDate;
+  DateTime _date = DateTime.now();
+  TextEditingController _dateController = TextEditingController();
+  final DateFormat _dateFormatter = DateFormat('yyyy-MM-dd');
 
-  _submit() async {
+  @override
+  void initState() {
+    super.initState();
+    // _dateController.text = _dateFormatter.format(_date);
+  }
+
+  @override
+  void dispose() {
+    _dateController.dispose();
+    super.dispose();
+  }
+
+  void _submit() async {
     if (_formKey.currentState.validate()) {
       _formKey.currentState.save();
 
       final prefs = await SharedPreferences.getInstance();
       prefs.setInt('lifeSpan', _lifeSpan);
-      prefs.setInt('curAge', _curAge);
+      prefs.setString('birthDate', _birthDate);
 
       DateTime now = new DateTime.now();
       prefs.setInt('registeredYear', now.year);
@@ -30,6 +47,47 @@ class _SelfInputState extends State<SelfInput> {
           builder: (_) => ResultScreen(),
         ),
       );
+    }
+  }
+
+  String lifeSpanValidator(input) {
+    if (input == null || input.trim().isEmpty) {
+      return tr('validate_no_lifespan');
+    }
+    return null;
+  }
+
+  String birthDayValidator(input) {
+    if (input == null || input == "") {
+      return tr('validate_birthdate');
+    } else if (_lifeSpan == null || _lifeSpan <= 0) {
+      return tr('validate_lifespan');
+    }
+
+    List<String> birthDateYMD = input.split("-");
+    DateTime now = new DateTime.now();
+    int curAge = now.year - int.parse(birthDateYMD[0]);
+
+    if (_lifeSpan <= curAge) {
+      return tr('validate_lifespan');
+    }
+    return null;
+  }
+
+  void _handleDatePicker(BuildContext context) async {
+    final DateTime date = await showDatePicker(
+      context: context,
+      locale: context.locale,
+      initialDate: _date,
+      firstDate: DateTime(1920),
+      lastDate: DateTime.now(),
+    );
+    if (date != null && date != _date) {
+      setState(() {
+        _date = date;
+        _birthDate = _dateFormatter.format(date);
+      });
+      _dateController.text = _dateFormatter.format(date);
     }
   }
 
@@ -45,40 +103,81 @@ class _SelfInputState extends State<SelfInput> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
               Text(
-                '직접 입력',
+                'self_title',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 28.0,
                   decoration: TextDecoration.none,
                 ),
-              ),
+              ).tr(),
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
-                    InputNumber(
-                      labelText: "기대 수명",
-                      validatorText: "기대수명을 입력해주세요.",
-                      onSaved: (input) {
+                    TextFormField(
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.white,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: tr('lifespan'),
+                        labelStyle: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.grey,
+                        ),
+                        enabledBorder: const UnderlineInputBorder(
+                          // width: 0.0 produces a thin "hairline" border
+                          borderSide: const BorderSide(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: TextInputType.number,
+                      validator: lifeSpanValidator,
+                      onChanged: (input) {
                         setState(() {
                           _lifeSpan = int.parse(input);
                         });
                       },
                     ),
-                    InputNumber(
-                      labelText: "현재 나이",
-                      validatorText: "현재 나이를 입력해주세요.",
-                      onSaved: (input) {
-                        setState(() {
-                          _curAge = int.parse(input);
-                        });
-                      },
+                    TextFormField(
+                      readOnly: true,
+                      controller: _dateController,
+                      style: TextStyle(
+                        fontSize: 18.0,
+                        color: Colors.white,
+                      ),
+                      onTap: () => _handleDatePicker(context),
+                      validator: birthDayValidator,
+                      decoration: InputDecoration(
+                        labelText: tr('birthdate'),
+                        labelStyle: TextStyle(
+                          fontSize: 18.0,
+                          color: Colors.grey,
+                        ),
+                        enabledBorder: const UnderlineInputBorder(
+                          // width: 0.0 produces a thin "hairline" border
+                          borderSide: const BorderSide(
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ),
                     ),
                     ButtonBar(
                       children: <Widget>[
                         FlatButton(
-                          child: Text('저장'),
-                          color: Theme.of(context).primaryColor,
+                          child: Text(
+                            'cancel',
+                            style: TextStyle(
+                              color: Colors.red,
+                            ),
+                          ).tr(),
+                          onPressed: () => Navigator.of(context).pop(),
+                        ),
+                        FlatButton(
+                          child: Text('save').tr(),
+                          color: Colors.blue[800],
                           onPressed: _submit,
                         ),
                       ],

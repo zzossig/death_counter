@@ -5,35 +5,36 @@ import 'question.dart';
 class QuestionBrain {
   int _questionNumber = 0;
 
+  // List<Question> _questionBank = [];
   List<Question> _questionBank = [
     Question(text: 'Question first', answers: [
-      Answer(text: "Answer1", isCorrect: false),
-      Answer(text: "Answer2", isCorrect: true),
-      Answer(text: "Answer3", isCorrect: false),
-      Answer(text: "Answer4", isCorrect: false),
+      Answer(text: "Answer1", score: 0.4),
+      Answer(text: "Answer2", score: 0.4),
+      Answer(text: "Answer3", score: 0.4),
+      Answer(text: "Answer4", score: 0.4),
     ]),
     Question(text: 'Question second', answers: [
-      Answer(text: "Answer1", isCorrect: false),
-      Answer(text: "Answer2", isCorrect: false),
-      Answer(text: "Answer3", isCorrect: true),
-      Answer(text: "Answer4", isCorrect: false),
+      Answer(text: "Answer1", score: 0.4),
+      Answer(text: "Answer2", score: 0.4),
+      Answer(text: "Answer3", score: 0.4),
+      Answer(text: "Answer4", score: 0.4),
     ]),
     Question(text: 'Question Third', answers: [
-      Answer(text: "Answer1", isCorrect: false),
-      Answer(text: "Answer2", isCorrect: false),
-      Answer(text: "Answer3", isCorrect: true),
-      Answer(text: "Answer4", isCorrect: false),
+      Answer(text: "Answer1", score: 0.4),
+      Answer(text: "Answer2", score: 0.4),
+      Answer(text: "Answer3", score: 0.4),
+      Answer(text: "Answer4", score: 0.4),
     ]),
     Question(text: 'Question Forth', answers: [
-      Answer(text: "Answer1", isCorrect: false),
-      Answer(text: "Answer3", isCorrect: true),
-      Answer(text: "Answer4", isCorrect: false),
+      Answer(text: "Answer1", score: 0.4),
+      Answer(text: "Answer3", score: 0.4),
+      Answer(text: "Answer4", score: 0.4),
     ]),
     Question(text: 'Question Fifth', answers: [
-      Answer(text: "Answer1", isCorrect: false),
-      Answer(text: "Answer2", isCorrect: true),
-      Answer(text: "Answer3", isCorrect: false),
-      Answer(text: "Answer4", isCorrect: false),
+      Answer(text: "Answer1", score: 0.4),
+      Answer(text: "Answer2", score: 0.4),
+      Answer(text: "Answer3", score: 0.4),
+      Answer(text: "Answer4", score: 0.4),
     ]),
   ];
 
@@ -47,6 +48,10 @@ class QuestionBrain {
     if (_questionNumber > 0) {
       _questionNumber--;
     }
+  }
+
+  void addQuestion(Question question) {
+    _questionBank.add(question);
   }
 
   Question getQuestion() {

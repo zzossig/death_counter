@@ -1,6 +1,13 @@
+import 'package:death_counter/helpers/answer.dart';
+import 'package:death_counter/helpers/question.dart';
 import 'package:death_counter/helpers/question_brain.dart';
-import 'package:death_counter/screens/result.dart';
+import 'package:death_counter/screens/calc_next_input.dart';
+import 'package:death_counter/screens/intro.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'dart:io' show Platform;
+import 'dart:convert';
+import 'package:flutter/services.dart' show rootBundle;
 
 class CalcInput extends StatefulWidget {
   @override
@@ -8,7 +15,118 @@ class CalcInput extends StatefulWidget {
 }
 
 class _CalcInputState extends State<CalcInput> {
-  QuestionBrain qb = new QuestionBrain();
+  QuestionBrain _qb = new QuestionBrain();
+
+  @override
+  void initState() {
+    super.initState();
+    initialize();
+  }
+
+  void initialize() async {
+    String languageCode = Platform.localeName.split('_')[0];
+
+    String questionsStr = await getJson('assets/utils/questions_$languageCode.json');
+    List<dynamic> questions = jsonDecode(questionsStr);
+
+    QuestionBrain qb = new QuestionBrain();
+    for (var q in questions) {
+      Question newQ = new Question(text: q['question'], answers: []);
+      var answers = q['answers'];
+      for (var a in answers) {
+        var answer = new Answer(text: a['text'], score: a['score']);
+        newQ.addAnswer(answer);
+      }
+
+      qb.addQuestion(newQ);
+    }
+
+    setState(() {
+      _qb = qb;
+    });
+
+    print(qb);
+  }
+
+  Future<String> getJson(String path) async {
+    return await rootBundle.loadString(path);
+  }
+
+  void _submit() async {
+    if (_qb.getQuestion().selected < 0) {
+      _showMyDialog();
+    } else {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => CalcNextInput(qb: _qb),
+        ),
+      );
+    }
+  }
+
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.grey[800],
+          title: Text.rich(
+            TextSpan(
+              style: TextStyle(color: Colors.white),
+              children: <InlineSpan>[
+                WidgetSpan(
+                  child: Padding(
+                    padding: const EdgeInsets.only(
+                      right: 4.0,
+                    ),
+                    child: Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 24.0,
+                      semanticLabel: tr('q_alert_title'),
+                    ),
+                  ),
+                ),
+                TextSpan(text: tr('q_alert_title')),
+              ],
+            ),
+          ),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'q_alert_msg1',
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    color: Colors.white,
+                  ),
+                ).tr(),
+                Text(
+                  'q_alert_msg2',
+                  style: TextStyle(
+                    fontSize: 12.0,
+                    color: Colors.white,
+                  ),
+                ).tr(),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('confirm').tr(),
+              color: Colors.grey[900],
+              textColor: Colors.white,
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +143,7 @@ class _CalcInputState extends State<CalcInput> {
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24.0),
                     child: Text(
-                      qb.getQuestionText(),
+                      _qb.getQuestionText(),
                       style: TextStyle(
                         color: Colors.blue,
                         fontSize: 28.0,
@@ -38,12 +156,10 @@ class _CalcInputState extends State<CalcInput> {
                       // mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: <Widget>[
-                        for (var i = 0;
-                            i < qb.getQuestion().getAnswers.length;
-                            i++)
+                        for (var i = 0; i < _qb.getQuestion().getAnswers.length; i++)
                           ListTile(
                             title: Text(
-                              qb.getQuestion().getAnswers[i].text,
+                              _qb.getQuestion().getAnswers[i].text,
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16.0,
@@ -51,16 +167,17 @@ class _CalcInputState extends State<CalcInput> {
                             ),
                             leading: Radio(
                               value: i,
-                              groupValue: qb.getQuestion().selected,
+                              activeColor: Colors.red,
+                              focusColor: Colors.blue,
+                              hoverColor: Colors.green,
+                              groupValue: _qb.getQuestion().selected,
                               onChanged: (value) {
                                 setState(() {
-                                  // print(value);
-                                  qb.getQuestion().selected = value;
+                                  _qb.getQuestion().selected = value;
                                 });
                               },
                             ),
                           ),
-                        // Text('11', style: TextStyle(color: Colors.red))
                       ],
                     ),
                   ),
@@ -69,12 +186,13 @@ class _CalcInputState extends State<CalcInput> {
             ),
             Padding(
               padding: const EdgeInsets.symmetric(
-                horizontal: 24.0,
-                vertical: 4.0,
+                horizontal: 16.0,
+                vertical: 8.0,
               ),
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
-                  for (int i = 0; i < qb.getQuestions().length; i++)
+                  for (int i = 0; i < _qb.getQuestions().length; i++)
                     Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 8.0,
@@ -82,9 +200,7 @@ class _CalcInputState extends State<CalcInput> {
                       child: Text(
                         '${i + 1}',
                         style: TextStyle(
-                          color: qb.getQuestionNumber() == i
-                              ? Colors.red
-                              : Colors.grey[800],
+                          color: _qb.getQuestionNumber() == i ? Theme.of(context).primaryColor : Colors.grey,
                         ),
                       ),
                     ),
@@ -92,49 +208,51 @@ class _CalcInputState extends State<CalcInput> {
               ),
             ),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
-                qb.isFirst()
-                    ? Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: FlatButton(
-                          child: Text('취소'),
-                          color: Theme.of(context).primaryColor,
-                          onPressed: () => Navigator.pop(context),
-                        ),
-                      )
-                    : Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                        child: FlatButton(
-                          child: Text('뒤로'),
-                          color: Theme.of(context).primaryColor,
-                          onPressed: () {
-                            setState(() {
-                              qb.prevQuestion();
-                            });
-                          },
-                        ),
-                      ),
-                qb.isFinal()
+                _qb.isFirst()
                     ? FlatButton(
-                        child: Text('결과보기'),
-                        color: Theme.of(context).primaryColor,
+                        child: Text('cancel').tr(),
+                        color: Colors.grey[900],
+                        textColor: Colors.white,
                         onPressed: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => ResultScreen(),
+                              builder: (_) => IntroScreen(),
                             ),
                           );
                         },
                       )
                     : FlatButton(
-                        child: Text('다음'),
-                        color: Theme.of(context).primaryColor,
+                        child: Text('back').tr(),
+                        color: Colors.grey[900],
+                        textColor: Colors.white,
                         onPressed: () {
                           setState(() {
-                            qb.nextQuestion();
+                            _qb.prevQuestion();
                           });
+                        },
+                      ),
+                _qb.isFinal()
+                    ? FlatButton(
+                        child: Text('next').tr(),
+                        color: Colors.grey[900],
+                        textColor: Colors.white,
+                        onPressed: _submit,
+                      )
+                    : FlatButton(
+                        child: Text('next').tr(),
+                        color: Colors.grey[900],
+                        textColor: Colors.white,
+                        onPressed: () {
+                          if (_qb.getQuestion().selected < 0) {
+                            _showMyDialog();
+                          } else {
+                            setState(() {
+                              _qb.nextQuestion();
+                            });
+                          }
                         },
                       ),
               ],

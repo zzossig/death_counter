@@ -1,6 +1,6 @@
 class Answer {
-  Answer({this.text, this.isCorrect});
+  Answer({this.text, this.score});
 
   final String text;
-  final bool isCorrect;
+  final double score;
 }

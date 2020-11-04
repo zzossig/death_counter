@@ -1,6 +1,7 @@
 import 'package:death_counter/screens/calc_input.dart';
 import 'package:death_counter/screens/self_input.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class IntroScreen extends StatelessWidget {
   @override
@@ -13,13 +14,13 @@ class IntroScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
             Text(
-              '나의 기대 수명',
+              'intro_title',
               style: TextStyle(
                 color: Colors.white,
                 fontSize: 28.0,
                 decoration: TextDecoration.none,
               ),
-            ),
+            ).tr(),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: <Widget>[
@@ -27,9 +28,9 @@ class IntroScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: FlatButton(
                     child: Text(
-                      '직접 입력',
+                      'intro_self',
                       style: TextStyle(color: Colors.white),
-                    ),
+                    ).tr(),
                     color: Theme.of(context).primaryColor,
                     onPressed: () {
                       Navigator.push(
@@ -45,10 +46,10 @@ class IntroScreen extends StatelessWidget {
                   padding: const EdgeInsets.all(8.0),
                   child: FlatButton(
                     child: Text(
-                      '계산하기',
+                      'intro_calc',
                       style: TextStyle(color: Colors.white),
-                    ),
-                    color: Theme.of(context).primaryColor,
+                    ).tr(),
+                    color: Theme.of(context).accentColor,
                     onPressed: () {
                       Navigator.push(
                         context,
