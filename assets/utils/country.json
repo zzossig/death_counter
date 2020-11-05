@@ -1,5 +1,17 @@
 [
   {
+    "name": "대한민국",
+    "code": "KR"
+  },
+  {
+    "name": "中國",
+    "code": "CN"
+  },
+  {
+    "name": "日本",
+    "code": "JP"
+  },
+  {
     "name": "Afghanistan",
     "code": "AF"
   },
@@ -174,10 +186,6 @@
   {
     "name": "Chile",
     "code": "CL"
-  },
-  {
-    "name": "China",
-    "code": "CN"
   },
   {
     "name": "Christmas Island",
@@ -436,10 +444,6 @@
     "code": "JM"
   },
   {
-    "name": "Japan",
-    "code": "JP"
-  },
-  {
     "name": "Jersey",
     "code": "JE"
   },
@@ -462,10 +466,6 @@
   {
     "name": "Democratic People's Republic of Korea",
     "code": "KP"
-  },
-  {
-    "name": "Korea, Republic of",
-    "code": "KR"
   },
   {
     "name": "Kosovo",

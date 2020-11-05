@@ -1,7 +1,8 @@
+import 'package:death_counter/helpers/answer.dart';
 import 'package:death_counter/helpers/question.dart';
 import 'package:death_counter/helpers/question_brain.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
+import 'package:flutter/services.dart' show FilteringTextInputFormatter, rootBundle;
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -26,6 +27,8 @@ class _CalcNextInputState extends State<CalcNextInput> {
   final DateFormat _dateFormatter = DateFormat('yyyy-MM-dd');
   Gender _gender = Gender.male;
   String _country;
+  int _weight;
+  int _height;
   List<dynamic> _countries;
   Map<String, dynamic> _lifespanByCountry;
 
@@ -68,20 +71,24 @@ class _CalcNextInputState extends State<CalcNextInput> {
       DateTime now = new DateTime.now();
       prefs.setInt('registeredYear', now.year);
 
-      int lifespan = calcLifespan();
+      double lifeSpan = calcLifespan();
+      prefs.setDouble('lifeSpan', lifeSpan);
 
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (_) => ResultScreen(),
-      //   ),
-      // );
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ResultScreen(),
+        ),
+      );
     }
   }
 
-  int calcLifespan() {
+  double calcLifespan() {
     double countryAvg;
     QuestionBrain qb = widget.qb;
+    DateTime now = new DateTime.now();
+    int birthYear = int.parse(_birthDate.split("-")[0]);
+    int curAge = now.year - birthYear;
 
     if (_lifespanByCountry.containsKey(_country)) {
       countryAvg = _gender == Gender.male ? _lifespanByCountry[_country]['male'] : _lifespanByCountry[_country]['female'];
@@ -89,11 +96,46 @@ class _CalcNextInputState extends State<CalcNextInput> {
       countryAvg = 70.0;
     }
 
+    double scoreSum = 0.0;
     for (Question q in qb.getQuestions()) {
-      print(q.selected);
+      List<Answer> answers = q.getAnswers;
+      scoreSum += answers[q.selected].getScore;
+    }
+    scoreSum += calcBMI();
+
+    double result = scoreSum == 0
+        ? countryAvg
+        : scoreSum < 0
+            ? countryAvg - (scoreSum / 4)
+            : countryAvg - (scoreSum / 3);
+
+    if (result <= curAge) {
+      result += 4;
     }
 
-    return 1;
+    return result;
+  }
+
+  double calcBMI() {
+    double bmi = _weight / (_height * 0.01 * _height * 0.01);
+    // 저체중 / 정상체중 / 위험체중 / 비만 1단계 / 비만 2단계 / 비만 3단계
+    double result = 1;
+
+    if (bmi < 18.5) {
+      result = 1.0;
+    } else if (bmi >= 18.5 && bmi < 23) {
+      result = 0;
+    } else if (bmi >= 23 && bmi < 25) {
+      result = 1.0;
+    } else if (bmi >= 25 && bmi < 30) {
+      result = 2.0;
+    } else if (bmi >= 30 && bmi < 40) {
+      result = 4.0;
+    } else if (bmi >= 40) {
+      result = 7.0;
+    }
+
+    return result;
   }
 
   String birthDayValidator(input) {
@@ -146,13 +188,15 @@ class _CalcNextInputState extends State<CalcNextInput> {
                       mainAxisSize: MainAxisSize.min,
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: <Widget>[
+                        SizedBox(
+                          height: 48,
+                        ),
                         Container(
-                          height: 120.0,
                           alignment: Alignment.center,
                           child: Text(
                             'required',
                             style: TextStyle(
-                              color: Colors.white,
+                              color: Theme.of(context).accentColor,
                               fontSize: 28.0,
                               decoration: TextDecoration.none,
                             ),
@@ -163,13 +207,16 @@ class _CalcNextInputState extends State<CalcNextInput> {
                           // still be at least as big as necessary to fit its contents.
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
-                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.start,
                             children: <Widget>[
                               Form(
                                 key: _formKey,
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
+                                    SizedBox(
+                                      height: 28.0,
+                                    ),
                                     TextFormField(
                                       readOnly: true,
                                       controller: _dateController,
@@ -193,7 +240,7 @@ class _CalcNextInputState extends State<CalcNextInput> {
                                       ),
                                     ),
                                     Padding(
-                                      padding: const EdgeInsets.only(top: 48.0),
+                                      padding: const EdgeInsets.only(top: 28.0),
                                       child: Text(
                                         'gender',
                                         style: TextStyle(
@@ -207,7 +254,7 @@ class _CalcNextInputState extends State<CalcNextInput> {
                                         Radio(
                                           value: Gender.male,
                                           groupValue: _gender,
-                                          activeColor: Theme.of(context).accentColor,
+                                          activeColor: Theme.of(context).primaryColor,
                                           onChanged: (Gender value) {
                                             setState(() {
                                               _gender = value;
@@ -219,7 +266,7 @@ class _CalcNextInputState extends State<CalcNextInput> {
                                         Radio(
                                           value: Gender.female,
                                           groupValue: _gender,
-                                          activeColor: Theme.of(context).accentColor,
+                                          activeColor: Theme.of(context).primaryColor,
                                           onChanged: (Gender value) {
                                             setState(() {
                                               _gender = value;
@@ -229,7 +276,6 @@ class _CalcNextInputState extends State<CalcNextInput> {
                                         Text('female').tr(),
                                       ],
                                     ),
-                                    SizedBox(height: 20.0),
                                     DropdownButtonFormField<String>(
                                       value: _country,
                                       icon: Icon(Icons.keyboard_arrow_down),
@@ -257,6 +303,72 @@ class _CalcNextInputState extends State<CalcNextInput> {
                                               );
                                             }).toList()
                                           : [],
+                                    ),
+                                    SizedBox(height: 12.0),
+                                    TextFormField(
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        color: Colors.white,
+                                      ),
+                                      decoration: InputDecoration(
+                                        labelText: tr('height'),
+                                        labelStyle: TextStyle(
+                                          fontSize: 18.0,
+                                          color: Colors.grey,
+                                        ),
+                                        enabledBorder: const UnderlineInputBorder(
+                                          // width: 0.0 produces a thin "hairline" border
+                                          borderSide: const BorderSide(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      keyboardType: TextInputType.number,
+                                      validator: (input) {
+                                        if (input == null || input.trim().isEmpty || int.parse(input.trim()) <= 50 || int.parse(input.trim()) >= 230) {
+                                          return tr('validate_height');
+                                        }
+                                        return null;
+                                      },
+                                      onChanged: (input) {
+                                        setState(() {
+                                          _height = int.parse(input);
+                                        });
+                                      },
+                                    ),
+                                    SizedBox(height: 20.0),
+                                    TextFormField(
+                                      style: TextStyle(
+                                        fontSize: 18.0,
+                                        color: Colors.white,
+                                      ),
+                                      decoration: InputDecoration(
+                                        labelText: tr('weight'),
+                                        labelStyle: TextStyle(
+                                          fontSize: 18.0,
+                                          color: Colors.grey,
+                                        ),
+                                        enabledBorder: const UnderlineInputBorder(
+                                          // width: 0.0 produces a thin "hairline" border
+                                          borderSide: const BorderSide(
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ),
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      keyboardType: TextInputType.number,
+                                      validator: (input) {
+                                        if (input == null || input.trim().isEmpty || int.parse(input.trim()) <= 20 || int.parse(input.trim()) >= 200) {
+                                          return tr('validate_weight');
+                                        }
+                                        return null;
+                                      },
+                                      onChanged: (input) {
+                                        setState(() {
+                                          _weight = int.parse(input);
+                                        });
+                                      },
                                     ),
                                   ],
                                 ),

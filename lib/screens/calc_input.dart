@@ -5,11 +5,13 @@ import 'package:death_counter/screens/calc_next_input.dart';
 import 'package:death_counter/screens/intro.dart';
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'dart:io' show Platform;
 import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
 class CalcInput extends StatefulWidget {
+  CalcInput({Key key, @required this.locale}) : super(key: key);
+  final String locale;
+
   @override
   _CalcInputState createState() => _CalcInputState();
 }
@@ -24,9 +26,7 @@ class _CalcInputState extends State<CalcInput> {
   }
 
   void initialize() async {
-    String languageCode = Platform.localeName.split('_')[0];
-
-    String questionsStr = await getJson('assets/utils/questions_$languageCode.json');
+    String questionsStr = await getJson('assets/utils/questions_${widget.locale}.json');
     List<dynamic> questions = jsonDecode(questionsStr);
 
     QuestionBrain qb = new QuestionBrain();
@@ -44,8 +44,6 @@ class _CalcInputState extends State<CalcInput> {
     setState(() {
       _qb = qb;
     });
-
-    print(qb);
   }
 
   Future<String> getJson(String path) async {
@@ -130,6 +128,11 @@ class _CalcInputState extends State<CalcInput> {
 
   @override
   Widget build(BuildContext context) {
+    if (_qb.size() <= 0) {
+      return Container(
+        child: Text('loading').tr(),
+      );
+    }
     return SafeArea(
       child: Material(
         color: Colors.black,
@@ -189,19 +192,14 @@ class _CalcInputState extends State<CalcInput> {
                 horizontal: 16.0,
                 vertical: 8.0,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              child: Wrap(
+                spacing: 8.0,
                 children: <Widget>[
                   for (int i = 0; i < _qb.getQuestions().length; i++)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8.0,
-                      ),
-                      child: Text(
-                        '${i + 1}',
-                        style: TextStyle(
-                          color: _qb.getQuestionNumber() == i ? Theme.of(context).primaryColor : Colors.grey,
-                        ),
+                    Text(
+                      '${i + 1}',
+                      style: TextStyle(
+                        color: _qb.getQuestionNumber() == i ? Theme.of(context).primaryColor : Colors.grey,
                       ),
                     ),
                 ],

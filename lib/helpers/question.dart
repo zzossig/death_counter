@@ -12,7 +12,6 @@ class Question {
   }
 
   void addAnswer(Answer answer) {
-    print(this.answers);
     this.answers.add(answer);
   }
 

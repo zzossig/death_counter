@@ -1,43 +1,191 @@
 [
   {
-    "question": "자신의 우울증 정도가 얼마나 되나요?",
+    "question": "How serious of your depression?",
     "answers": [
       {
-        "text": "전혀 없다",
-        "score": 1.1
+        "text": "Not at all",
+        "score": -1.0
       },
       {
-        "text": "조금 있다",
-        "score": 2.1
+        "text": "Have a little",
+        "score": 0.5
       },
       {
-        "text": "조금 많다",
-        "score": 3.1
+        "text": "Many",
+        "score": 1.5
       },
       {
-        "text": "심각하다",
-        "score": 4.1
+        "text": "Very Serious",
+        "score": 5.0
       }
     ]
   },
   {
-    "question": "결혼은 하셨나요?",
+    "question": "Do you live with family, friends, or lover?",
     "answers": [
       {
-        "text": "기혼",
-        "score": 1.1
+        "text": "Yes",
+        "score": -1.0
       },
       {
-        "text": "미혼",
-        "score": 2.1
+        "text": "No",
+        "score": 2.0
+      }
+    ]
+  },
+  {
+    "question": "How many times do you exercise in a week?",
+    "answers": [
+      {
+        "text": "Never",
+        "score": 4.0
       },
       {
-        "text": "이혼",
-        "score": 3.1
+        "text": "1~2 times a week",
+        "score": -1.0
       },
       {
-        "text": "재혼",
-        "score": 4.1
+        "text": "3~5 times a week",
+        "score": -2.0
+      },
+      {
+        "text": "6~7 times a week",
+        "score": -4.0
+      }
+    ]
+  },
+  {
+    "question": "Are(Were) your grandparents over 85 years old? Or are(were) your great-grandparents over 80 years old?",
+    "answers": [
+      {
+        "text": "Yes",
+        "score": -1.0
+      },
+      {
+        "text": "No",
+        "score": 2.0
+      }
+    ]
+  },
+  {
+    "question": "How many times do you meditate in a week",
+    "answers": [
+      {
+        "text": "Never",
+        "score": 1.0
+      },
+      {
+        "text": "Sometimes",
+        "score": -2.0
+      },
+      {
+        "text": "Quite Frequently",
+        "score": -4.0
+      }
+    ]
+  },
+  {
+    "question": "How much stress do you get in a day?",
+    "answers": [
+      {
+        "text": "Never",
+        "score": -3.0
+      },
+      {
+        "text": "Little a bit",
+        "score": 0.0
+      },
+      {
+        "text": "A lot",
+        "score": 1.0
+      },
+      {
+        "text": "Quite Serious",
+        "score": 3.0
+      }
+    ]
+  },
+  {
+    "question": "Do you eat spicy and salty food?",
+    "answers": [
+      {
+        "text": "Never",
+        "score": -3.0
+      },
+      {
+        "text": "Sometimes",
+        "score": 0.0
+      },
+      {
+        "text": "Frequently",
+        "score": 2.0
+      },
+      {
+        "text": "Always",
+        "score": 5.0
+      }
+    ]
+  },
+  {
+    "question": "How many hours do you stay hungry a day? (Excluding sleep time)",
+    "answers": [
+      {
+        "text": "2~5 hours",
+        "score": 2.0
+      },
+      {
+        "text": "6~9 hours",
+        "score": -2.0
+      },
+      {
+        "text": "10~12 hours",
+        "score": -4.0
+      },
+      {
+        "text": "13시간 hours",
+        "score": -5.0
+      }
+    ]
+  },
+  {
+    "question": "How often you smoke?",
+    "answers": [
+      {
+        "text": "Non Smoker",
+        "score": -1.0
+      },
+      {
+        "text": "Half pack a day",
+        "score": 2.0
+      },
+      {
+        "text": "A pack a day",
+        "score": 4.0
+      },
+      {
+        "text": "Over one pack a day",
+        "score": 6.0
+      }
+    ]
+  },
+  {
+    "question": "How often do you drink per week?",
+    "answers": [
+      {
+        "text": "Rarely drink",
+        "score": -1.0
+      },
+      {
+        "text": "1~2 times per week",
+        "score": 1.0
+      },
+      {
+        "text": "3~5 times per week",
+        "score": 2.0
+      },
+      {
+        "text": "6~7 times per week",
+        "score": 4.0
       }
     ]
   }

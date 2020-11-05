@@ -1,5 +1,5 @@
-import 'dart:io' show Platform;
 import 'dart:async';
+import 'dart:math';
 import 'package:death_counter/screens/intro.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -36,7 +36,6 @@ class _ResultScreenState extends State<ResultScreen> {
     bool isExist = await checkIfExist();
 
     if (isExist) {
-      setLocale();
       setToday();
       setRemainingDays();
       startTimer();
@@ -50,19 +49,9 @@ class _ResultScreenState extends State<ResultScreen> {
     }
   }
 
-  void setLocale() {
-    String languageCode = Platform.localeName.split('_')[0];
-
-    if (languageCode == 'ko') {
-      context.locale = Locale('ko');
-    } else {
-      context.locale = Locale('en');
-    }
-  }
-
   Future<bool> checkIfExist() async {
     final prefs = await SharedPreferences.getInstance();
-    final lifeSpan = prefs.getInt('lifeSpan');
+    final lifeSpan = prefs.getDouble('lifeSpan');
     final birthDate = prefs.getString('birthDate');
     final registeredYear = prefs.getInt('registeredYear');
 
@@ -73,17 +62,21 @@ class _ResultScreenState extends State<ResultScreen> {
   }
 
   void setRemainingDays() async {
-    final int lifeSpan = await getIntData("lifeSpan");
+    final double lifeSpan = await getDoubleData("lifeSpan");
     final String birthDate = await getStringData("birthDate");
     final int registeredYear = await getIntData("registeredYear");
+
+    var rand = new Random();
+    int lifeSpanYear = lifeSpan.toInt();
+    double lifeSpanRemainder = (lifeSpan - lifeSpanYear.toDouble()) * 100;
+    int endDateMonth = (lifeSpanRemainder ~/ 8.33) + 1;
+    int endDateDay = rand.nextInt(27) + 1;
 
     var now = new DateTime.now();
     List<String> birthDateYMD = birthDate.split("-");
     int curAge = now.year - int.parse(birthDateYMD[0]);
-    var endDate = DateTime(
-        registeredYear + (lifeSpan - curAge), DateTime.july, 1, 0, 0, 1, 1);
-    var birthDateDateTime = DateTime(int.parse(birthDateYMD[0]),
-        int.parse(birthDateYMD[1]), int.parse(birthDateYMD[2]), 0, 0, 1, 1);
+    var endDate = DateTime(registeredYear + (lifeSpanYear - curAge), endDateMonth, endDateDay, 0, 0, 1, 1);
+    var birthDateDateTime = DateTime(int.parse(birthDateYMD[0]), int.parse(birthDateYMD[1]), int.parse(birthDateYMD[2]), 0, 0, 1, 1);
     var diff = endDate.difference(now);
     var passedDays = now.difference(birthDateDateTime).inDays;
     var remainingDays = diff.inDays - 1; // -1 for countdown time
@@ -115,8 +108,7 @@ class _ResultScreenState extends State<ResultScreen> {
     var now = new DateTime.now();
     setState(() {
       _today = new DateTime.now();
-      _todayEnd =
-          new DateTime(_today.year, _today.month, _today.day, 23, 59, 59, 999);
+      _todayEnd = new DateTime(_today.year, _today.month, _today.day, 23, 59, 59, 999);
       _remainingTime = _todayEnd.difference(now);
     });
   }
@@ -126,6 +118,13 @@ class _ResultScreenState extends State<ResultScreen> {
     _timer = new Timer.periodic(fiftyMilliseconds, (timer) {
       setRemainingTimes();
     });
+  }
+
+  Future<double> getDoubleData(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = prefs.getDouble(key) ?? 0;
+
+    return data;
   }
 
   Future<int> getIntData(String key) async {
@@ -259,8 +258,7 @@ class _ResultScreenState extends State<ResultScreen> {
                           Container(
                             child: Column(
                               children: [
-                                Text(
-                                    '${_remainingPerc != null ? (_remainingPerc * 100).toStringAsFixed(2) : 0}%',
+                                Text('${_remainingPerc != null ? (_remainingPerc * 100).toStringAsFixed(2) : 0}%',
                                     style: TextStyle(
                                       fontSize: 18.0,
                                       fontWeight: FontWeight.w600,
@@ -277,8 +275,7 @@ class _ResultScreenState extends State<ResultScreen> {
                             foregroundPainter: RadialPainter(
                               bgColor: Colors.grey,
                               lineColor: Colors.red,
-                              percent:
-                                  _remainingPerc != null ? _remainingPerc : 0,
+                              percent: _remainingPerc != null ? _remainingPerc : 0,
                               width: 4.0,
                             ),
                             child: Row(
@@ -291,10 +288,8 @@ class _ResultScreenState extends State<ResultScreen> {
                                       width: 200,
                                       height: 200,
                                       child: Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        crossAxisAlignment: CrossAxisAlignment.center,
                                         children: [
                                           Text(
                                             printHMS(context),
@@ -306,8 +301,7 @@ class _ResultScreenState extends State<ResultScreen> {
                                         ],
                                       ),
                                       decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: Colors.grey, width: 2),
+                                        border: Border.all(color: Colors.grey, width: 2),
                                         shape: BoxShape.circle,
                                         boxShadow: [
                                           BoxShadow(
@@ -353,8 +347,7 @@ class _ResultScreenState extends State<ResultScreen> {
                             child: Container(
                               child: Column(
                                 children: [
-                                  Text(
-                                      '${(_remainingPerc != null ? 100 - _remainingPerc * 100 : 0).toStringAsFixed(2)}%',
+                                  Text('${(_remainingPerc != null ? 100 - _remainingPerc * 100 : 0).toStringAsFixed(2)}%',
                                       style: TextStyle(
                                         fontSize: 18.0,
                                         fontWeight: FontWeight.w600,

@@ -12,7 +12,7 @@ class SelfInput extends StatefulWidget {
 
 class _SelfInputState extends State<SelfInput> {
   final _formKey = GlobalKey<FormState>();
-  int _lifeSpan;
+  double _lifeSpan;
   String _birthDate;
   DateTime _date = DateTime.now();
   TextEditingController _dateController = TextEditingController();
@@ -35,7 +35,7 @@ class _SelfInputState extends State<SelfInput> {
       _formKey.currentState.save();
 
       final prefs = await SharedPreferences.getInstance();
-      prefs.setInt('lifeSpan', _lifeSpan);
+      prefs.setDouble('lifeSpan', _lifeSpan);
       prefs.setString('birthDate', _birthDate);
 
       DateTime now = new DateTime.now();
@@ -68,7 +68,7 @@ class _SelfInputState extends State<SelfInput> {
     DateTime now = new DateTime.now();
     int curAge = now.year - int.parse(birthDateYMD[0]);
 
-    if (_lifeSpan <= curAge) {
+    if (_lifeSpan <= curAge.toDouble()) {
       return tr('validate_lifespan');
     }
     return null;
@@ -137,7 +137,7 @@ class _SelfInputState extends State<SelfInput> {
                       validator: lifeSpanValidator,
                       onChanged: (input) {
                         setState(() {
-                          _lifeSpan = int.parse(input);
+                          _lifeSpan = double.parse(input);
                         });
                       },
                     ),
